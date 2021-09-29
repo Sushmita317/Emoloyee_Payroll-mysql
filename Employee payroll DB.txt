@@ -1,0 +1,148 @@
+UC1:
+
+CREATE DATABASE payroll_service;  // Creating database .
+show databases;   // To show all existing databases.
+use payroll_service;  // Switching to payroll_service database.
+
+UC2:
+
+CREATE TABLE employee_payroll   // Creating table in database.
+    -> (
+    ->  id      INT unsigned NOT NULL AUTO_INCREMENT,
+    ->  name    VARCHAR(150) NOT NULL,
+    ->  salary  DOUBLE NOT NULL,
+    ->  start   DATE NOT NULL,
+    ->  PRIMARY KEY     (id)
+    -> );   
+
+UC3:  // Inserting employee pay roll data.
+
+INSERT INTO employee_payroll (name, salary, start) VALUES
+    -> ('samarth', 1800000, '2020-07-18'),
+    -> ('Mukesh', 170000, '2019-05-21'),
+    -> ('Anil', 160000, '2019-04-14');
+
+UC4:  
+
+SELECT * FROM employee_payroll;  // Retrieve data from employee_payroll.
+
+ UC5:
+
+// Getting salary of particular employee.
+SELECT salary FROM employee_payroll WHERE name = 'samarth'; 
+
+// Getting all employee details based on start date to present date.
+SELECT * FROM employee_payroll
+     WHERE start BETWEEN CAST('2019-01-01' AS DATE) AND DATE(NOW()); 
+
+UC6:
+
+// Alter to add another column with gender.
+ALTER TABLE employee_payroll ADD gender CHAR(1) AFTER name;
+
+
+// Updating employee details to add gender.
+update employee_payroll set gender = 'M' where name = 'samarth' or name = 'Mukesh' or name = 'Anil';
+
+UC7:
+
+// Sum of salary when grouped by gender.
+SELECT gender, SUM(salary) FROM employee_payroll GROUP BY gender;
+
+// Average of salary when grouped by gender.
+SELECT gender, AVG(salary) FROM employee_payroll GROUP BY gender;
+
+// counting number of male and female.
+SELECT gender, COUNT(name) FROM employee_payroll GROUP BY gender;
+
+// To find the employee with minimum salary.
+SELECT * FROM employee_payroll
+    WHERE salary = (SELECT MIN(salary) FROM employee_payroll);
+
+// To find the employee with maximum salary.
+SELECT * FROM employee_payroll
+    WHERE salary = (SELECT MAX(salary) FROM employee_payroll);
+
+UC8: Alter table to add phone number, address, department and set default address.
+
+ ALTER TABLE employee_payroll ADD phone_number BIGINT AFTER name;
+Query OK, 0 rows affected (1.83 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE employee_payroll ADD address VARCHAR(200) AFTER phone_number;
+Query OK, 0 rows affected (1.52 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql>
+mysql> ALTER TABLE employee_payroll ADD department VARCHAR(200) NOT NULL AFTER address;
+Query OK, 0 rows affected (1.46 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE employee_payroll ALTER address SET DEFAULT 'ABC';
+Query OK, 0 rows affected (0.17 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> describe employee_payroll;
++--------------+--------------+------+-----+---------+----------------+
+| Field        | Type         | Null | Key | Default | Extra          |
++--------------+--------------+------+-----+---------+----------------+
+| id           | int unsigned | NO   | PRI | NULL    | auto_increment |
+| name         | varchar(150) | NO   |     | NULL    |                |
+| phone_number | bigint       | YES  |     | NULL    |                |
+| address      | varchar(200) | YES  |     | ABC     |                |
+| department   | varchar(200) | NO   |     | NULL    |                |
+| gender       | char(1)      | YES  |     | NULL    |                |
+| salary       | double       | NO   |     | NULL    |                |
+| start        | date         | NO   |     | NULL    |                |
++--------------+--------------+------+-----+---------+----------------+
+
+UC9: To rename salry to basic pay and add deductions, taxable pay, income tax and net pay.
+
+ ALTER TABLE employee_payroll RENAME COLUMN salary TO basic_pay;
+Query OK, 0 rows affected (0.10 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM employee_payroll;
++----+---------+--------------+---------+------------+--------+-----------+------------+
+| id | name    | phone_number | address | department | gender | basic_pay | start      |
++----+---------+--------------+---------+------------+--------+-----------+------------+
+|  1 | samarth |         NULL | NULL    |            | M      |   1800000 | 2020-07-18 |
+|  2 | Mukesh  |         NULL | NULL    |            | M      |    170000 | 2019-05-21 |
+|  3 | Anil    |         NULL | NULL    |            | M      |    160000 | 2019-04-14 |
+|  4 | Jasmine |         NULL | NULL    |            | F      |      5000 | 2017-06-26 |
++----+---------+--------------+---------+------------+--------+-----------+------------+
+4 rows in set (0.00 sec)
+
+mysql> ALTER TABLE employee_payroll ADD deductions DOUBLE NOT NULL AFTER basic_pay;
+Query OK, 0 rows affected (1.18 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE employee_payroll ADD taxable_pay DOUBLE NOT NULL AFTER deductions;
+Query OK, 0 rows affected (0.91 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE employee_payroll ADD income_tax DOUBLE NOT NULL AFTER taxable_pay;
+Query OK, 0 rows affected (0.89 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> ALTER TABLE employee_payroll ADD net_pay DOUBLE NOT NULL AFTER income_tax;
+Query OK, 0 rows affected (0.78 sec)
+Records: 0  Duplicates: 0  Warnings: 0
+
+mysql> SELECT * FROM employee_payroll;
++----+---------+--------------+---------+------------+--------+-----------+------------+-------------+------------+---------+------------+
+| id | name    | phone_number | address | department | gender | basic_pay | deductions | taxable_pay | income_tax | net_pay | start      |
++----+---------+--------------+---------+------------+--------+-----------+------------+-------------+------------+---------+------------+
+|  1 | samarth |         NULL | NULL    |            | M      |   1800000 |          0 |           0 |          0 |       0 | 2020-07-18 |
+|  2 | Mukesh  |         NULL | NULL    |            | M      |    170000 |          0 |           0 |          0 |       0 | 2019-05-21 |
+|  3 | Anil    |         NULL | NULL    |            | M      |    160000 |          0 |           0 |          0 |       0 | 2019-04-14 |
+|  4 | Jasmine |         NULL | NULL    |            | F      |      5000 |          0 |           0 |          0 |       0 | 2017-06-26 |
++----+---------+--------------+---------+------------+--------+-----------+------------+-------------+------------+---------+------------+
+4 rows in set (0.00 sec)
+
+
+
+
+
+
+
